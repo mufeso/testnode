@@ -1,0 +1,9 @@
+{
+  "name": "node-todo-learning",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A small Node.js Todo CLI built step by step",
+  "scripts": {
+    "start": "node todo.js"
+  }
+}
