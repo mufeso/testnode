@@ -1,3 +1,8 @@
 'use strict';
 
-console.log('Node.js Todo application');
+const [, , command, ...args] = process.argv;
+
+console.log({
+  command: command || null,
+  args
+});
