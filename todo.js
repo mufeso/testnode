@@ -2,7 +2,15 @@
 
 const [, , command, ...args] = process.argv;
 
-console.log({
-  command: command || null,
-  args
-});
+function printUsage() {
+  console.log('Usage: node todo.js <command> [arguments]');
+}
+
+if (!command) {
+  printUsage();
+} else {
+  console.log({
+    command,
+    args
+  });
+}
