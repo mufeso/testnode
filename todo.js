@@ -3,14 +3,21 @@
 const [, , command, ...args] = process.argv;
 
 function printUsage() {
-  console.log('Usage: node todo.js <command> [arguments]');
+  console.log('Usage:');
+  console.log('  node todo.js add <task>');
+  console.log('  node todo.js list');
 }
 
-if (!command) {
-  printUsage();
-} else {
+function handleCommand() {
+  if (!command) {
+    printUsage();
+    return;
+  }
+
   console.log({
     command,
     args
   });
 }
+
+handleCommand();
