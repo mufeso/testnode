@@ -11,22 +11,36 @@ function printUsage() {
 }
 
 function addTask(title) {
-  tasks.push({
+  const task = {
     id: tasks.length + 1,
     title,
     completed: false
+  };
+
+  tasks.push(task);
+  return task;
+}
+
+function listTasks() {
+  if (tasks.length === 0) {
+    console.log('No tasks found');
+    return;
+  }
+
+  tasks.forEach(task => {
+    console.log(`${task.id}. ${task.title}`);
   });
 }
 
 function handleCommand() {
   if (command === 'add') {
-    addTask(args.join(' '));
-    console.log('Task added');
+    const task = addTask(args.join(' '));
+    console.log(`Task added: ${task.title}`);
     return;
   }
 
   if (command === 'list') {
-    console.log(tasks);
+    listTasks();
     return;
   }
 
