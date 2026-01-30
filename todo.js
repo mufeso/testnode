@@ -54,7 +54,7 @@ function listTasks() {
   });
 }
 
-function handleCommand() {
+function handleCommand(command, args) {
   switch (command) {
     case 'add': {
       const title = args.join(' ').trim();
@@ -80,4 +80,4 @@ function handleCommand() {
   }
 }
 
-handleCommand();
+handleCommand(command, args);
