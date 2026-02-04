@@ -31,13 +31,16 @@ function validateTitle(title) {
   };
 }
 
-function addTask(title) {
-  const task = {
-    id: tasks.length + 1,
+function createTask(id, title) {
+  return {
+    id,
     title,
     completed: false
   };
+}
 
+function addTask(title) {
+  const task = createTask(tasks.length + 1, title);
   tasks.push(task);
   return task;
 }
