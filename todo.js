@@ -56,9 +56,7 @@ function listTasks() {
     return;
   }
 
-  tasks.forEach(task => {
-    console.log(formatTask(task));
-  });
+  console.log(tasks.map(formatTask).join('\n'));
 }
 
 function handleCommand(command, args) {
