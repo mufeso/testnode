@@ -45,6 +45,11 @@ function addTask(title) {
   return task;
 }
 
+function formatTask(task) {
+  const state = task.completed ? 'done' : 'open';
+  return `${task.id}. [${state}] ${task.title}`;
+}
+
 function listTasks() {
   if (tasks.length === 0) {
     console.log('No tasks found');
@@ -52,8 +57,7 @@ function listTasks() {
   }
 
   tasks.forEach(task => {
-    const state = task.completed ? 'done' : 'open';
-    console.log(`${task.id}. [${state}] ${task.title}`);
+    console.log(formatTask(task));
   });
 }
 
