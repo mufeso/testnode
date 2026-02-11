@@ -45,6 +45,10 @@ function addTask(title) {
   return task;
 }
 
+function findTask(id) {
+  return tasks.find(task => task.id === id);
+}
+
 function formatTask(task) {
   const state = task.completed ? 'done' : 'open';
   return `${task.id}. [${state}] ${task.title}`;
