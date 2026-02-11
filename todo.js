@@ -8,6 +8,7 @@ function printUsage() {
   console.log('Usage:');
   console.log('  node todo.js add <task>');
   console.log('  node todo.js list');
+  console.log('  node todo.js remove <id>');
 }
 
 function validateTitle(title) {
@@ -49,6 +50,17 @@ function findTask(id) {
   return tasks.find(task => task.id === id);
 }
 
+function removeTask(id) {
+  const index = tasks.findIndex(task => task.id === id);
+
+  if (index === -1) {
+    return false;
+  }
+
+  tasks.splice(index, 1);
+  return true;
+}
+
 function formatTask(task) {
   const state = task.completed ? 'done' : 'open';
   return `${task.id}. [${state}] ${task.title}`;
@@ -83,6 +95,19 @@ function handleCommand(command, args) {
     case 'list':
       listTasks();
       break;
+
+    case 'remove': {
+      const id = Number(args[0]);
+
+      if (!Number.isInteger(id) || !removeTask(id)) {
+        console.error(`Task not found: ${args[0]}`);
+        process.exitCode = 1;
+      } else {
+        console.log(`Task removed: ${id}`);
+      }
+
+      break;
+    }
 
     default:
       printUsage();
