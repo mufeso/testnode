@@ -54,11 +54,18 @@ function removeTask(id) {
   const index = tasks.findIndex(task => task.id === id);
 
   if (index === -1) {
-    return false;
+    return {
+      removed: false,
+      reason: `Task not found: ${id}`
+    };
   }
 
-  tasks.splice(index, 1);
-  return true;
+  const [task] = tasks.splice(index, 1);
+
+  return {
+    removed: true,
+    task
+  };
 }
 
 function formatTask(task) {
@@ -98,12 +105,13 @@ function handleCommand(command, args) {
 
     case 'remove': {
       const id = Number(args[0]);
+      const result = removeTask(id);
 
-      if (!Number.isInteger(id) || !removeTask(id)) {
-        console.error(`Task not found: ${args[0]}`);
+      if (!result.removed) {
+        console.error(result.reason);
         process.exitCode = 1;
       } else {
-        console.log(`Task removed: ${id}`);
+        console.log(`Task removed: ${result.task.title}`);
       }
 
       break;
