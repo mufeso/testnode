@@ -1,8 +1,24 @@
 'use strict';
 
+const fs = require('node:fs');
+const path = require('node:path');
+
+const DATA_FILE = path.join(__dirname, 'tasks.json');
 const [, , command, ...args] = process.argv;
 
-const tasks = [];
+function loadTasks() {
+  if (!fs.existsSync(DATA_FILE)) {
+    return [];
+  }
+
+  return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+}
+
+function saveTasks(tasks) {
+  fs.writeFileSync(DATA_FILE, `${JSON.stringify(tasks, null, 2)}\n`);
+}
+
+const tasks = loadTasks();
 
 function printUsage() {
   console.log('Usage:');
@@ -43,6 +59,7 @@ function createTask(id, title) {
 function addTask(title) {
   const task = createTask(tasks.length + 1, title);
   tasks.push(task);
+  saveTasks(tasks);
   return task;
 }
 
@@ -57,6 +74,7 @@ function removeTask(id) {
   }
 
   const [task] = tasks.splice(index, 1);
+  saveTasks(tasks);
 
   return {
     removed: true,
