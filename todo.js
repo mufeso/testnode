@@ -46,10 +46,6 @@ function addTask(title) {
   return task;
 }
 
-function findTask(id) {
-  return tasks.find(task => task.id === id);
-}
-
 function removeTask(id) {
   const index = tasks.findIndex(task => task.id === id);
 
