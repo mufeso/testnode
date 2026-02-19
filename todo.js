@@ -105,6 +105,13 @@ function handleCommand(command, args) {
 
     case 'remove': {
       const id = Number(args[0]);
+
+      if (!Number.isInteger(id)) {
+        console.error('A numeric task ID is required');
+        process.exitCode = 1;
+        return;
+      }
+
       const result = removeTask(id);
 
       if (!result.removed) {
@@ -123,5 +130,3 @@ function handleCommand(command, args) {
 }
 
 handleCommand(command, args);
-
-
