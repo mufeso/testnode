@@ -12,9 +12,15 @@ function loadTasks() {
   }
 
   try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-  } catch {
-    console.error('Could not read tasks.json');
+    const parsed = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+
+    if (!Array.isArray(parsed)) {
+      throw new Error('Todo data must be an array');
+    }
+
+    return parsed;
+  } catch (error) {
+    console.error(`Could not read tasks.json: ${error.message}`);
     process.exitCode = 1;
     return [];
   }
