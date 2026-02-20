@@ -11,7 +11,13 @@ function loadTasks() {
     return [];
   }
 
-  return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  try {
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  } catch {
+    console.error('Could not read tasks.json');
+    process.exitCode = 1;
+    return [];
+  }
 }
 
 function saveTasks(tasks) {
@@ -56,8 +62,12 @@ function createTask(id, title) {
   };
 }
 
+function nextId() {
+  return tasks.reduce((highest, task) => Math.max(highest, task.id), 0) + 1;
+}
+
 function addTask(title) {
-  const task = createTask(tasks.length + 1, title);
+  const task = createTask(nextId(), title);
   tasks.push(task);
   saveTasks(tasks);
   return task;
