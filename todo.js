@@ -38,6 +38,7 @@ function printUsage() {
   console.log('  node todo.js list');
   console.log('  node todo.js remove <id>');
   console.log('  node todo.js complete <id>');
+  console.log('  node todo.js reopen <id>');
 }
 
 function validateTitle(title) {
@@ -94,7 +95,7 @@ function removeTask(id) {
 
   if (index === -1) {
     return {
-      removed: false,
+      changed: false,
       reason: `Task not found: ${id}`
     };
   }
@@ -103,26 +104,26 @@ function removeTask(id) {
   saveTasks(tasks);
 
   return {
-    removed: true,
+    changed: true,
     task
   };
 }
 
-function completeTask(id) {
+function setTaskState(id, completed) {
   const task = tasks.find(item => item.id === id);
 
   if (!task) {
     return {
-      completed: false,
+      changed: false,
       reason: `Task not found: ${id}`
     };
   }
 
-  task.completed = true;
+  task.completed = completed;
   saveTasks(tasks);
 
   return {
-    completed: true,
+    changed: true,
     task
   };
 }
@@ -161,7 +162,9 @@ function handleCommand(command, args) {
       listTasks();
       break;
 
-    case 'remove': {
+    case 'remove':
+    case 'complete':
+    case 'reopen': {
       const id = Number(args[0]);
 
       if (!Number.isInteger(id)) {
@@ -170,34 +173,16 @@ function handleCommand(command, args) {
         return;
       }
 
-      const result = removeTask(id);
+      const completed = command === 'complete';
+      const result = command === 'remove'
+        ? removeTask(id)
+        : setTaskState(id, completed);
 
-      if (!result.removed) {
+      if (!result.changed) {
         console.error(result.reason);
         process.exitCode = 1;
       } else {
-        console.log(`Task removed: ${result.task.title}`);
-      }
-
-      break;
-    }
-
-    case 'complete': {
-      const id = Number(args[0]);
-
-      if (!Number.isInteger(id)) {
-        console.error('A numeric task ID is required');
-        process.exitCode = 1;
-        return;
-      }
-
-      const result = completeTask(id);
-
-      if (!result.completed) {
-        console.error(result.reason);
-        process.exitCode = 1;
-      } else {
-        console.log(`Task completed: ${result.task.title}`);
+        console.log(`Task updated: ${result.task.title}`);
       }
 
       break;
