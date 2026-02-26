@@ -37,6 +37,7 @@ function printUsage() {
   console.log('  node todo.js add <task>');
   console.log('  node todo.js list');
   console.log('  node todo.js remove <id>');
+  console.log('  node todo.js complete <id>');
 }
 
 function validateTitle(title) {
@@ -47,14 +48,16 @@ function validateTitle(title) {
     };
   }
 
-  if (!title.trim()) {
+  const value = title.trim();
+
+  if (!value) {
     return {
       valid: false,
       reason: 'A task title is required'
     };
   }
 
-  if (title.length > 120) {
+  if (value.length > 120) {
     return {
       valid: false,
       reason: 'A task title must not exceed 120 characters'
@@ -63,7 +66,7 @@ function validateTitle(title) {
 
   return {
     valid: true,
-    value: title.trim()
+    value
   };
 }
 
@@ -101,6 +104,25 @@ function removeTask(id) {
 
   return {
     removed: true,
+    task
+  };
+}
+
+function completeTask(id) {
+  const task = tasks.find(item => item.id === id);
+
+  if (!task) {
+    return {
+      completed: false,
+      reason: `Task not found: ${id}`
+    };
+  }
+
+  task.completed = true;
+  saveTasks(tasks);
+
+  return {
+    completed: true,
     task
   };
 }
@@ -155,6 +177,27 @@ function handleCommand(command, args) {
         process.exitCode = 1;
       } else {
         console.log(`Task removed: ${result.task.title}`);
+      }
+
+      break;
+    }
+
+    case 'complete': {
+      const id = Number(args[0]);
+
+      if (!Number.isInteger(id)) {
+        console.error('A numeric task ID is required');
+        process.exitCode = 1;
+        return;
+      }
+
+      const result = completeTask(id);
+
+      if (!result.completed) {
+        console.error(result.reason);
+        process.exitCode = 1;
+      } else {
+        console.log(`Task completed: ${result.task.title}`);
       }
 
       break;
