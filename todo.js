@@ -40,7 +40,14 @@ function printUsage() {
 }
 
 function validateTitle(title) {
-  if (!title) {
+  if (typeof title !== 'string') {
+    return {
+      valid: false,
+      reason: 'A task title must be a string'
+    };
+  }
+
+  if (!title.trim()) {
     return {
       valid: false,
       reason: 'A task title is required'
@@ -56,7 +63,7 @@ function validateTitle(title) {
 
   return {
     valid: true,
-    value: title
+    value: title.trim()
   };
 }
 
@@ -115,8 +122,7 @@ function listTasks() {
 function handleCommand(command, args) {
   switch (command) {
     case 'add': {
-      const title = args.join(' ').trim();
-      const result = validateTitle(title);
+      const result = validateTitle(args.join(' '));
 
       if (!result.valid) {
         console.error(result.reason);
