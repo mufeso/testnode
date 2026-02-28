@@ -109,7 +109,7 @@ function removeTask(id) {
   };
 }
 
-function setTaskState(id, completed) {
+function updateTask(id, changes) {
   const task = tasks.find(item => item.id === id);
 
   if (!task) {
@@ -119,7 +119,7 @@ function setTaskState(id, completed) {
     };
   }
 
-  task.completed = completed;
+  Object.assign(task, changes);
   saveTasks(tasks);
 
   return {
@@ -193,7 +193,9 @@ function handleCommand(command, args) {
         return;
       }
 
-      const result = setTaskState(id, command === 'complete');
+      const result = updateTask(id, {
+        completed: command === 'complete'
+      });
 
       if (!result.changed) {
         console.error(result.reason);
