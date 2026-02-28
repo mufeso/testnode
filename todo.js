@@ -162,7 +162,27 @@ function handleCommand(command, args) {
       listTasks();
       break;
 
-    case 'remove':
+    case 'remove': {
+      const id = Number(args[0]);
+
+      if (!Number.isInteger(id)) {
+        console.error('A numeric task ID is required');
+        process.exitCode = 1;
+        return;
+      }
+
+      const result = removeTask(id);
+
+      if (!result.changed) {
+        console.error(result.reason);
+        process.exitCode = 1;
+      } else {
+        console.log(`Task removed: ${result.task.title}`);
+      }
+
+      break;
+    }
+
     case 'complete':
     case 'reopen': {
       const id = Number(args[0]);
@@ -173,10 +193,7 @@ function handleCommand(command, args) {
         return;
       }
 
-      const completed = command === 'complete';
-      const result = command === 'remove'
-        ? removeTask(id)
-        : setTaskState(id, completed);
+      const result = setTaskState(id, command === 'complete');
 
       if (!result.changed) {
         console.error(result.reason);
