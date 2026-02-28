@@ -212,4 +212,12 @@ function handleCommand(command, args) {
   }
 }
 
-handleCommand(command, args);
+if (require.main === module) {
+  handleCommand(command, args);
+}
+
+module.exports = {
+  validateTitle,
+  createTask,
+  formatTask
+};
