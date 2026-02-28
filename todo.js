@@ -219,5 +219,7 @@ if (require.main === module) {
 module.exports = {
   validateTitle,
   createTask,
-  formatTask
+  formatTask,
+  loadTasks,
+  saveTasks
 };
