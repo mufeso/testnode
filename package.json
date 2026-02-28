@@ -4,6 +4,7 @@
   "private": true,
   "description": "A small Node.js Todo CLI built step by step",
   "scripts": {
-    "start": "node todo.js"
+    "start": "node todo.js",
+    "test": "node todo.test.js"
   }
 }
