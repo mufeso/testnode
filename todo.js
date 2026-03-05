@@ -6,13 +6,13 @@ const path = require('node:path');
 const DATA_FILE = path.join(__dirname, 'tasks.json');
 const [, , command, ...args] = process.argv;
 
-function loadTasks() {
-  if (!fs.existsSync(DATA_FILE)) {
+function loadTasks(file = DATA_FILE) {
+  if (!fs.existsSync(file)) {
     return [];
   }
 
   try {
-    const parsed = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
 
     if (!Array.isArray(parsed)) {
       throw new Error('Todo data must be an array');
@@ -20,14 +20,14 @@ function loadTasks() {
 
     return parsed;
   } catch (error) {
-    console.error(`Could not read tasks.json: ${error.message}`);
+    console.error(`Could not read task data: ${error.message}`);
     process.exitCode = 1;
     return [];
   }
 }
 
-function saveTasks(tasks) {
-  fs.writeFileSync(DATA_FILE, `${JSON.stringify(tasks, null, 2)}\n`);
+function saveTasks(tasks, file = DATA_FILE) {
+  fs.writeFileSync(file, `${JSON.stringify(tasks, null, 2)}\n`);
 }
 
 const tasks = loadTasks();
