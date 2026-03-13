@@ -46,6 +46,13 @@ assert.equal(
   '2. [done] write tests'
 );
 
+fs.writeFileSync(tempFile, '{"invalid":true}');
+
+assert.throws(
+  () => loadTasks(tempFile),
+  /Todo data must be an array/
+);
+
 fs.unlinkSync(tempFile);
 
 console.log('Todo persistence tests passed');
