@@ -20,9 +20,7 @@ function loadTasks(file = DATA_FILE) {
 
     return parsed;
   } catch (error) {
-    console.error(`Could not read task data: ${error.message}`);
-    process.exitCode = 1;
-    return [];
+    throw new Error(`Could not read task data: ${error.message}`);
   }
 }
 
@@ -30,7 +28,14 @@ function saveTasks(tasks, file = DATA_FILE) {
   fs.writeFileSync(file, `${JSON.stringify(tasks, null, 2)}\n`);
 }
 
-const tasks = loadTasks();
+let tasks;
+
+try {
+  tasks = loadTasks();
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
 
 function printUsage() {
   console.log('Usage:');
