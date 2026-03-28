@@ -28,22 +28,12 @@ function saveTasks(tasks, file = DATA_FILE) {
   fs.writeFileSync(file, `${JSON.stringify(tasks, null, 2)}\n`);
 }
 
-let tasks;
-
-try {
-  tasks = loadTasks();
-} catch (error) {
-  console.error(error.message);
-  process.exit(1);
-}
-
-function printUsage() {
-  console.log('Usage:');
-  console.log('  node todo.js add <task>');
-  console.log('  node todo.js list');
-  console.log('  node todo.js remove <id>');
-  console.log('  node todo.js complete <id>');
-  console.log('  node todo.js reopen <id>');
+function createTask(id, title) {
+  return {
+    id,
+    title,
+    completed: false
+  };
 }
 
 function validateTitle(title) {
@@ -76,116 +66,128 @@ function validateTitle(title) {
   };
 }
 
-function createTask(id, title) {
-  return {
-    id,
-    title,
-    completed: false
-  };
-}
-
-function nextId() {
-  return tasks.reduce((highest, task) => Math.max(highest, task.id), 0) + 1;
-}
-
-function addTask(title) {
-  const task = createTask(nextId(), title);
-  tasks.push(task);
-  saveTasks(tasks);
-  return task;
-}
-
-function removeTask(id) {
-  const index = tasks.findIndex(task => task.id === id);
-
-  if (index === -1) {
-    return {
-      changed: false,
-      reason: `Task not found: ${id}`
-    };
-  }
-
-  const [task] = tasks.splice(index, 1);
-  saveTasks(tasks);
-
-  return {
-    changed: true,
-    task
-  };
-}
-
-function updateTask(id, changes) {
-  const task = tasks.find(item => item.id === id);
-
-  if (!task) {
-    return {
-      changed: false,
-      reason: `Task not found: ${id}`
-    };
-  }
-
-  Object.assign(task, changes);
-  saveTasks(tasks);
-
-  return {
-    changed: true,
-    task
-  };
-}
-
 function formatTask(task) {
   const state = task.completed ? 'done' : 'open';
   return `${task.id}. [${state}] ${task.title}`;
 }
 
-function listTasks() {
-  if (tasks.length === 0) {
-    console.log('No tasks found');
-    return;
+function createTodoStore(file = DATA_FILE) {
+  const tasks = loadTasks(file);
+
+  function nextId() {
+    return tasks.reduce((highest, task) => Math.max(highest, task.id), 0) + 1;
   }
 
-  console.log(tasks.map(formatTask).join('\n'));
+  function add(title) {
+    const task = createTask(nextId(), title);
+    tasks.push(task);
+    saveTasks(tasks, file);
+    return task;
+  }
+
+  function remove(id) {
+    const index = tasks.findIndex(task => task.id === id);
+
+    if (index === -1) {
+      return {
+        changed: false,
+        reason: `Task not found: ${id}`
+      };
+    }
+
+    const [task] = tasks.splice(index, 1);
+    saveTasks(tasks, file);
+
+    return {
+      changed: true,
+      task
+    };
+  }
+
+  function update(id, changes) {
+    const task = tasks.find(item => item.id === id);
+
+    if (!task) {
+      return {
+        changed: false,
+        reason: `Task not found: ${id}`
+      };
+    }
+
+    Object.assign(task, changes);
+    saveTasks(tasks, file);
+
+    return {
+      changed: true,
+      task
+    };
+  }
+
+  function list() {
+    return [...tasks];
+  }
+
+  return {
+    add,
+    remove,
+    update,
+    list
+  };
 }
 
-function handleCommand(command, args) {
+function printUsage() {
+  console.log('Usage:');
+  console.log('  node todo.js add <task>');
+  console.log('  node todo.js list');
+  console.log('  node todo.js remove <id>');
+  console.log('  node todo.js complete <id>');
+  console.log('  node todo.js reopen <id>');
+}
+
+function runCommand(command, args, store) {
   switch (command) {
     case 'add': {
       const result = validateTitle(args.join(' '));
 
       if (!result.valid) {
         console.error(result.reason);
-        process.exitCode = 1;
-        return;
+        return 1;
       }
 
-      const task = addTask(result.value);
+      const task = store.add(result.value);
       console.log(`Task added: ${task.title}`);
-      break;
+      return 0;
     }
 
-    case 'list':
-      listTasks();
-      break;
+    case 'list': {
+      const tasks = store.list();
+
+      if (tasks.length === 0) {
+        console.log('No tasks found');
+        return 0;
+      }
+
+      console.log(tasks.map(formatTask).join('\n'));
+      return 0;
+    }
 
     case 'remove': {
       const id = Number(args[0]);
 
       if (!Number.isInteger(id)) {
         console.error('A numeric task ID is required');
-        process.exitCode = 1;
-        return;
+        return 1;
       }
 
-      const result = removeTask(id);
+      const result = store.remove(id);
 
       if (!result.changed) {
         console.error(result.reason);
-        process.exitCode = 1;
-      } else {
-        console.log(`Task removed: ${result.task.title}`);
+        return 1;
       }
 
-      break;
+      console.log(`Task removed: ${result.task.title}`);
+      return 0;
     }
 
     case 'complete':
@@ -194,31 +196,36 @@ function handleCommand(command, args) {
 
       if (!Number.isInteger(id)) {
         console.error('A numeric task ID is required');
-        process.exitCode = 1;
-        return;
+        return 1;
       }
 
-      const result = updateTask(id, {
+      const result = store.update(id, {
         completed: command === 'complete'
       });
 
       if (!result.changed) {
         console.error(result.reason);
-        process.exitCode = 1;
-      } else {
-        console.log(`Task updated: ${result.task.title}`);
+        return 1;
       }
 
-      break;
+      console.log(`Task updated: ${result.task.title}`);
+      return 0;
     }
 
     default:
       printUsage();
+      return 1;
   }
 }
 
 if (require.main === module) {
-  handleCommand(command, args);
+  try {
+    const store = createTodoStore();
+    process.exitCode = runCommand(command, args, store);
+  } catch (error) {
+    console.error(error.message);
+    process.exitCode = 1;
+  }
 }
 
 module.exports = {
@@ -226,5 +233,7 @@ module.exports = {
   createTask,
   formatTask,
   loadTasks,
-  saveTasks
+  saveTasks,
+  createTodoStore,
+  runCommand
 };
